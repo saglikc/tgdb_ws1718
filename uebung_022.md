@@ -88,15 +88,22 @@ Erstelle für dich einen neuen Benutzer.
 
 #### Lösung
 ```sql
-Deine Lösung
-```
+ INSERT INTO ACCOUNT
+   VALUES (
+    (SELECT MAX(ACCOUNT_ID)+1 FROM ACCOUNT),
+    'Cagla',
+    'Saglik',
+    'sagikc@hochschule-trier.de',
+    SYSDATE,
+    SYSDATE
+   );
 
 ### Aufgabe 10
 Erstelle für deinen neuen Benutzer ein neues Auto. Dieses Auto dient als Vorlage für die nächten Aufgabem.
 
 #### Lösung
-```sqld
-Deine Lösung
+```sql
+
 ```
 
 ### Aufgabe 11
