@@ -17,7 +17,12 @@ Um genauere Informationen und Prognosen mit Data Mining Werkzeugen zu schöpfen,
 
 #### Lösung
 ```sql
-Deine Lösung
+create table acc_add
+( acc_add_id number(38) not null,
+ account_id number(38) not null,
+ street varchar(32) not null,
+ address_id number(38) not null,
+ country_id number(38) not null;
 ```
 
 ### Aufgabe 2
