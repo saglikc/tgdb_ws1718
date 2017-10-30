@@ -60,15 +60,23 @@ Erstelle eine INNER JOIN (optional `WHERE`) Abfrage um die Beziehung zwischen de
 
 #### Lösung
 ```sql
-Deine Lösung
-```
+
+SELECT a.surname "Nachname", a.forename "Vorname", vt.vehicle_type_name "Typ", p.producer_name "Hersteller", v.Version "Modell", v.build_year, g.gas_name "Kraftstoff"
+FROM account a
+ INNER JOIN acc_vehic accv ON (a.account_id = accv.account_id)
+ INNER JOIN vehicle v ON (v.vehicle_id = accv.vehicle_id)
+ INNER JOIN VEHICLE_TYPE vt ON(vt.vehicle_type_id = v.vehicle_type_id)
+ INNER JOIN producer p ON (p.producer_id = v.producer_id)
+ INNER JOIN gas g ON (v.default_gas_id = g.gas_id);  
+ 
+ ```
 
 ### Aufgabe 6
 Welche Fahrzeuge wurden noch keinem Benutzer zugewiesen? Gebe über das Fahrzeug Informationen über den Typ, den Hersteller, das Modell, Baujahr und den Kraftstoff aus.
 
 #### Lösung
 ```sql
-Deine Lösung
+SELECT vt.vehicle_type_name "Typ", p.producer_name "Hersteller", v.version "Modell", v.build
 ```
 
 ### Aufgabe 7
@@ -84,7 +92,13 @@ An welcher Tankstelle wurde noch nie getankt? Gebe zu den Tankstellen die Inform
 
 #### Lösung
 ```sql
-Deine Lösung
+select pr.provider, a.plz, a.city
+from gas_station gs
+inner join provider pr on (pr.provider_id = gs.provider_id)
+inner join address ad on (gs.address_id = a.address_id)
+inner join country c on (c.country_id = gs.country_id)
+where gs.gas_station_id not in( 
+select gas_station_idfrom receipt 9);
 ```
 
 ### Aufgabe 9
@@ -132,7 +146,12 @@ Aktualisiere den Steuersatz aller Belege auf den Steuersatz des Landes, indem di
 
 #### Lösung
 ```sql
-Deine Lösung
+update receipt r
+set duty_amount =
+( select c.duty_amount
+from country c
+inner join gas_station gs on (c.country_id = gs.country_id)
+where gs.gas_station_id = r.gas_station_id) ;
 ```
 
 
