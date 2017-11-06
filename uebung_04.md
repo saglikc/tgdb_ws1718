@@ -30,7 +30,9 @@ Als App Entwickler/in für Android und iOS möchtest du dich nicht darauf verlas
 
 #### Lösung
 ```sql
-Deine Lösung
+ALTER TABLE GAS_STATION
+   ADD (GPS_POS_X NUMBER(10,5),
+        GPS_POS_Y NUMBER(10,5));
 ```
 
 ### Aufgabe 3
@@ -38,7 +40,14 @@ Welche Kunden haben im Jahr 2017 mehr als den Durchschnitt getank?
 
 #### Lösung
 ```sql
-Deine Lösung
+select a.account_id
+from receipt p
+group by r.account_id
+having avg( (r.price_l * r.liter) * r.duty_amount) > (
+		Select avg (price_l * liter) * duty_amount ) 
+		from receipt
+		where to_char(receipt_date, 'yyyy') = '2017'
+		;
 ```
 
 ### Aufgabe 4
@@ -49,7 +58,13 @@ Wurden die Tabellen-Rechte direkt an dich bzw. an `PUBLIC` vergeben?
 
 ##### Lösung
 ```sql
-Deine Lösung
+SELECT table_schema, privilege, grantee
+FROM all_tab_privs
+WHERE table_schema = 'SCOTT'
+and table_name in ('dept', 'emp')
+and grantee in (
+	(select user from dual),
+	'public');
 ```
 
 #### Aufgabe 4.2
@@ -57,7 +72,8 @@ Welche Rollen besitzt du direkt?
 
 ##### Lösung
 ```sql
-Deine Lösung
+SELECT  granted_role, default_role
+FROM user_role_privs;
 ```
 
 #### Aufgabe 4.3
@@ -65,15 +81,28 @@ Welche Rollen haben die Rollen?
 
 ##### Lösung
 ```sql
-Deine Lösung
-```
+SELECT granted_role, role
+FROM role_role_privs 
+WHERE role in(
+	select granted_role
+	from user_role_privs); ---abfrage der rollen(wi_student, fh_trier)
+
+fh_trier hat wi_student als rolle
+bw_student hat student als rolle	
+	
+	
+	```
 
 #### Aufgabe 4.4
 Haben die Rollen Rechte an `SCOTT.EMP` oder `SCOTT.DEPT`?
 
 ##### Lösung
 ```sql
-Deine Lösung
+SELECT *
+FROM role_tab_privs
+where table_name in ('emp', 'dept')
+and role in ('FH_TRIER', 'STUDENT', 'BASTUDENT' , 'BW_STUDENT')
+and owner = 'SCOTT';
 ```
 
 ### Aufgabe 5
@@ -88,7 +117,30 @@ Es soll für jede Tankstelle der Umsatz einzelner Jahre aufgelistet werden auf B
 
 #### Lösung
 ```sql
-Deine Lösung
+SELECT to_char(r.receipt_date, 'yyyy') "Jahr",
+	   p.provider_name "Anbieter",
+	   gs.street "Straße",
+	   a.plz "PLZ",
+	   a.city "Stadt",
+	   a.country_name "Land",
+	   SUM(r.price_l * r.liter * (1 + r.duty_amount)) "Umsatz"
+	   
+FROM receipt r
+	inner join gas_station gs on (r.gas_station_id = gs.gas_station_id)
+	inner join provider p on (p.provider_id = gs.provider_id)
+	inner join country c on (c.country_id = gs.country_id)
+	inner join address a on (a.address_id = gs.address_id)
+	
+GROUP BY r.receipt_date,
+	   p.provider_name,
+	   gs.street,
+	   a.plz,
+	   a.city, 
+	   a.country_name
+	   
+ORDER BY "Jahr", "Anbieter", "Straße", "PLZ", "Stadt", "Land";
+	   
+	  
 ```
 
 
