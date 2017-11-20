@@ -38,7 +38,10 @@ END;
 
 #### Lösung
 ```sql
-Deine Lösung
+DECLARE-Block variablen, datentyp und cursor deklarieren. Der '%Type' zeigt den typ der bei provider den provider.name abfrägt.
+begin block : into muss die gleiche reihenfolge wie declare haben! Der speichert die declare sachen in die into sachen.
+exception = wenn der begin bolock nicht ausgeführt werden kann.
+'-20001' steht für die Stelle von dem Fehler.
 ```
 
 ### Aufgabe 2
@@ -54,6 +57,8 @@ Analysiere den untenstehenden anonymen PL/SQL-Code. Was macht er?
 Passe den Codeblock so an, dass für jede Tankstelle alle Kunden die dort einmal tanken, waren ausgegeben werden.
 
 ```sql
+!!!set serveroutput on!!! zeigt die tabelle an, was geändert wurde.
+
 DECLARE
 BEGIN
   DBMS_OUTPUT.PUT_LINE('Liste alle Tankstellen aus Deutschland');
@@ -72,7 +77,9 @@ END;
 
 #### Lösung
 ```sql
-Deine Lösung
+!!!cursor!!! ist wie ein array, die schleife soll es jedesmal durchführen und nicht alle arrays auf einmal anzeigen. cursoy immer in declare deklarieren also variable anlegen.
+|| wie + in array, also verbinde text mit variable.
+
 ```
 
 ### Aufgabe 4

@@ -20,7 +20,9 @@ Wie heißt der Primary Key Contraint der Tabelle `VEHICLE` und für welche Spalt
 
 #### Lösung
 ```sql
-Deine Lösung
+select constraint_name, constraint_type, search_condition, r_owner, r_constraint_name
+from user_constraints
+where table_name = 'VEHICLE' and constraint_type = 'P';
 ```
 
 ### Aufgabe 2
@@ -28,7 +30,9 @@ Für welche Spalte**n** der Tabelle `ACC_VEHIC` wurde ein Foreign Key angelegt u
 
 #### Lösung
 ```sql
-Deine Lösung
+select constraint_name, constraint_type, search_condition, r_owner, r_constraint_name
+from user_constraints
+where table_name = 'ACC_VEHIC' and constraint_type = 'R' ;
 ```
 
 ### Aufgabe 3
@@ -36,7 +40,8 @@ Erstelle einen Check Constraint für die Tabelle `ACCOUNT`, dass der Wert der Sp
 
 #### Lösung
 ```sql
-Deine Lösung
+ALTER table account add constraint c_date
+check (U_DATE < C_DATE);
 ```
 
 ### Aufgabe 4
@@ -44,7 +49,8 @@ Erstelle einen Check Constraint der überprüft, ob der erste Buchstabe der Spal
 
 #### Lösung
 ```sql
-Deine Lösung
+alter table gas add constraint c_gas_name
+check (gas_name = UPPER(gas_name));
 ```
 
 ### Aufgabe 5
@@ -58,7 +64,9 @@ Erstelle einen Check Contraint der überprüft, ob der Wert der Spalte `IDENTICA
 
 #### Lösung
 ```sql
-Deine Lösung
+alter table acc_vehic
+add constraint c_kennzeichen_entspricht
+check (regexp_like(identicator, '/[A-Z]\{1,3}[:][A-Z]\{1,2}[1-9][0-9]\{0,3}'));
 ```
 
 ### Aufgabe 6 - Wiederholung
@@ -66,7 +74,9 @@ Liste für alle Personen den Verbrauch an Kraftstoff auf (Missachte hier die unt
 
 #### Lösung
 ```sql
-Deine Lösung
+select liter, surname, forename, price_L, kilometer, price_l*kilometer as preis_SUMME
+from receipt
+inner join account on (account.account_id = receipt.account_id);
 ```
 
 ### Aufgabe 7 - Wiederholung
@@ -74,7 +84,9 @@ Liste die Tankstellen absteigend sortiert nach der Kundenanzahl über alle Jahre
 
 #### Lösung
 ```sql
-Deine Lösung
+select gas_station_id
+from gas_station
+order by gas_station_id desc;
 ```
 
 ### Aufgabe 8 - Wiederholung
@@ -84,11 +96,23 @@ Berücksichtige bitte jegliche Constraints!
 
 #### Lösung
 ```sql
-Deine Lösung
+create table fahrtenbuch
+(account_name number(38) not null,
+beginn_uhrzeit time('HH:MM:SS') not null,
+beginn_date date('YYYY-MM-DD') not null,
+ende_uhrzeit time('HH:MM:SS') not null,
+end_date date('YYYY-MM-DD') not null,
+foreign key(account_name) references account(account_id));
 ```
 
 
 
 
-
+CREATE TABLE Fahrtenbuch
+(Account_name NUMBER(38) NOT NULL, 
+BEGINN_UHRZEIT time('HH:MM:SS') NOT NULL,
+BEGINN_DATE date('YYYY-MM-DD') NOT NULL,
+ENDE_UHRZEIT time('HH:MM:SS') NOT NULL,
+END_DATE date('YYYY-MM-DD') NOT NULL,
+FOREIGN KEY(Account_name) REFERENCES ACCOUNT(ACCOUNT_ID));
 
