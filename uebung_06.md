@@ -23,6 +23,29 @@ Wie heißt der Primary Key Contraint der Tabelle `VEHICLE` und für welche Spalt
 select constraint_name, constraint_type, search_condition, r_owner, r_constraint_name
 from user_constraints
 where table_name = 'VEHICLE' and constraint_type = 'P';
+
+-- Markus
+ P = Primary Key
+ R = Foreign Key
+ U = Unique
+ C = Check
+ 
+ SELECT ucc.constraint_name, ucc.column_name, ucc.position
+ FROM user_cons_columns ucc
+ WHERE ucc.constraint_name IN (
+   SELECT uc.constraint_name
+   FROM user_constraints uc
+   WHERE uc.table_name LIKE 'VEHICLE'
+   AND uc.constraint_type = 'P'
+ );
+ 
+ 
+ -- Alternative Lösung
+ SELECT ucc.constraint_name, ucc.column_name, ucc.position
+ FROM user_cons_columns ucc
+   INNER JOIN user_constraints uc ON (ucc.constraint_name = uc.constraint_name)
+ WHERE uc.table_name LIKE 'VEHICLE'
+ AND uc.constraint_type = 'P';
 ```
 
 ### Aufgabe 2
@@ -30,9 +53,19 @@ Für welche Spalte**n** der Tabelle `ACC_VEHIC` wurde ein Foreign Key angelegt u
 
 #### Lösung
 ```sql
-select constraint_name, constraint_type, search_condition, r_owner, r_constraint_name
-from user_constraints
-where table_name = 'ACC_VEHIC' and constraint_type = 'R' ;
+-- Für SQL-Plus
+ COLUMN CONSTRAINT_NAME FORMAT a25
+ COLUMN COLUMN_NAME FORMAT a15
+ COLUMN TABLE_NAME FORMAT a15
+ 
+ SELECT ucc.constraint_name, ucc.column_name, ucc.table_name
+ FROM user_cons_columns ucc
+ WHERE ucc.constraint_name IN (
+   SELECT uc.r_constraint_name
+   FROM user_constraints uc
+   WHERE uc.table_name LIKE 'ACC_VEHIC'
+   AND uc.constraint_type = 'R'
+ );
 ```
 
 ### Aufgabe 3
@@ -40,8 +73,15 @@ Erstelle einen Check Constraint für die Tabelle `ACCOUNT`, dass der Wert der Sp
 
 #### Lösung
 ```sql
-ALTER table account add constraint c_date
-check (U_DATE < C_DATE);
+-- Constraint
+ ALTER TABLE ACCOUNT ADD CONSTRAINT c_date
+ CHECK (U_DATE >= C_DATE);
+ 
+ 
+ -- Überprüfung
+ UPDATE account
+ SET u_date = TO_DATE('2014-11-13', 'YYYY-MM-DD')
+ WHERE account_id = 1;
 ```
 
 ### Aufgabe 4
@@ -49,8 +89,10 @@ Erstelle einen Check Constraint der überprüft, ob der erste Buchstabe der Spal
 
 #### Lösung
 ```sql
-alter table gas add constraint c_gas_name
-check (gas_name = UPPER(gas_name));
+-- Markus
+ ALTER TABLE gas
+ ADD CONSTRAINT u_gas_name
+ CHECK (REGEXP_LIKE(gas_name, '^[A-Z].*$', 'c'));
 ```
 
 ### Aufgabe 5
@@ -64,9 +106,32 @@ Erstelle einen Check Contraint der überprüft, ob der Wert der Spalte `IDENTICA
 
 #### Lösung
 ```sql
-alter table acc_vehic
-add constraint c_kennzeichen_entspricht
-check (regexp_like(identicator, '/[A-Z]\{1,3}[:][A-Z]\{1,2}[1-9][0-9]\{0,3}'));
+-- Constraint
+ alter table acc_vehic
+ add constraint c_kennzeichen_etspricht
+ check (regexp_like(identicator, '^[A-Z]{1,3}:([A-Z]{1,2}:[1-9][0-9]{0,3}|[1-9][0-9]{0,5})$', 'c'));
+ 
+ -- Tests durch Falscheingabe
+ UPDATE acc_vehic
+ SET identicator = '8:ß:I'
+ WHERE vehicle_id = 1;
+ 
+ UPDATE acc_vehic
+ SET identicator = 'ZF:53:833'
+ WHERE vehicle_id = 1;
+ 
+ UPDATE acc_vehic
+ SET identicator = '10:MP:783'
+ WHERE vehicle_id = 1;
+ 
+ UPDATE acc_vehic
+ SET identicator = '10: :783'
+ WHERE vehicle_id = 1;
+ 
+ -- Update funktioniert
+ UPDATE acc_vehic
+ SET identicator = 'TR:WS:52'
+ WHERE vehicle_id = 1;
 ```
 
 ### Aufgabe 6 - Wiederholung
@@ -74,9 +139,24 @@ Liste für alle Personen den Verbrauch an Kraftstoff auf (Missachte hier die unt
 
 #### Lösung
 ```sql
-select liter, surname, forename, price_L, kilometer, price_l*kilometer as preis_SUMME
-from receipt
-inner join account on (account.account_id = receipt.account_id);
+-- Markus
+ COLUMN SURNAME FORMAT a15
+ COLUMN FORNAME FORMAT a15
+ 
+ SELECT  a.surname,
+         a.forename,
+         (
+           SELECT SUM(r.price_l*r.liter*1+r.duty_amount)
+           FROM receipt r
+           WHERE account_id = a.account_id
+           GROUP BY r.account_id
+         ) "Ausgaben2",
+         (
+           SELECT SUM(r.liter)
+           FROM receipt r
+           WHERE account_id = a.account_id
+         ) "Getankte Liter"
+ FROM account a;
 ```
 
 ### Aufgabe 7 - Wiederholung
@@ -84,9 +164,23 @@ Liste die Tankstellen absteigend sortiert nach der Kundenanzahl über alle Jahre
 
 #### Lösung
 ```sql
+--fabian
 select gas_station_id
 from gas_station
 order by gas_station_id desc;
+
+-- Markus
+ SELECT  TO_CHAR(r.c_date, 'YYYY') "Jahr",
+         p.provider_name "Provider",
+         gs.street "Straße",
+         a.plz "PLZ",
+         a.city "Stadt",
+         COUNT(r.account_id) "Anzahl"
+ FROM  gas_station gs
+   INNER JOIN provider p ON (p.provider_id = gs.provider_id)
+   INNER JOIN address a ON (a.address_id = gs.address_id)
+   INNER JOIN receipt r ON (r.gas_station_id = gs.gas_station_id)
+ GROUP BY r.c_date, p.provider_name, gs.street, a.plz, a.city;
 ```
 
 ### Aufgabe 8 - Wiederholung
@@ -96,23 +190,29 @@ Berücksichtige bitte jegliche Constraints!
 
 #### Lösung
 ```sql
-create table fahrtenbuch (
-	account_name number(38) not null,
-	beginn_uhrzeit time('HH:MM:SS') not null,
-	beginn_date date('YYYY-MM-DD') not null,
-	ende_uhrzeit time('HH:MM:SS') not null,
-	end_date date('YYYY-MM-DD') not null
-);
+-- Markus
+ CREATE TABLE LBOOK (
+   LBOOK_ID      NUMBER(38) NOT NULL,  -- PK
+   ACCOUNT_ID    NUMBER(38) NOT NULL,  -- FK
+   ACC_VEHIC_ID  NUMBER(38) NOT NULL,  -- FK
+   B_DATE        DATE NOT NULL,
+   KILOMETER     NUMBER(7,3) NOT NULL,
+   S_DATE        DATE NOT NULL
+ );
+ 
+ ALTER TABLE LBOOK
+ ADD CONSTRAINT LBOOK_PK
+ PRIMARY KEY (LBOOK_ID);
+ 
+ ALTER TABLE LBOOK
+ ADD CONSTRAINT buxdehude_fk
+ FOREIGN KEY (ACCOUNT_ID) REFERENCES ACCOUNT(ACCOUNT_ID);
+ 
+ ALTER TABLE LBOOK
+ ADD CONSTRAINT trier_fk
+ FOREIGN KEY (ACC_VEHIC_ID) REFERENCES ACC_VEHIC(ACC_VEHIC_ID);
+ 
+ ALTER TABLE LBOOK
+ ADD CONSTRAINT check_date
+ CHECK (S_DATE >= B_DATE);
 ```
-
-
-
-
-CREATE TABLE Fahrtenbuch
-(Account_name NUMBER(38) NOT NULL, 
-BEGINN_UHRZEIT time('HH:MM:SS') NOT NULL,
-BEGINN_DATE date('YYYY-MM-DD') NOT NULL,
-ENDE_UHRZEIT time('HH:MM:SS') NOT NULL,
-END_DATE date('YYYY-MM-DD') NOT NULL,
-FOREIGN KEY(Account_name) REFERENCES ACCOUNT(ACCOUNT_ID));
-
