@@ -220,4 +220,5 @@ Ausführen der Prozedur
 EXEC I_RECEIPT('peschm@fh-trier.de', 1, NULL, NULL, '1', '1,12', '478', '44,78', NULL);
 ```
 
+---- u_date, geändertsys_date system datum also von heute, c_date = für angelegt. zb.vot 8 tagen. t_date = datum generieren
 
