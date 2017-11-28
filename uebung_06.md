@@ -96,13 +96,13 @@ Berücksichtige bitte jegliche Constraints!
 
 #### Lösung
 ```sql
-create table fahrtenbuch
-(account_name number(38) not null,
-beginn_uhrzeit time('HH:MM:SS') not null,
-beginn_date date('YYYY-MM-DD') not null,
-ende_uhrzeit time('HH:MM:SS') not null,
-end_date date('YYYY-MM-DD') not null,
-foreign key(account_name) references account(account_id));
+create table fahrtenbuch (
+	account_name number(38) not null,
+	beginn_uhrzeit time('HH:MM:SS') not null,
+	beginn_date date('YYYY-MM-DD') not null,
+	ende_uhrzeit time('HH:MM:SS') not null,
+	end_date date('YYYY-MM-DD') not null
+);
 ```
 
 
